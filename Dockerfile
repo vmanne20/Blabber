@@ -1,5 +1,5 @@
 FROM node
-WORKDIR /Users/vmanne20/Documents/Docker/CS2304_semester_project_manne_dinardov
+WORKDIR /blabber_app
 COPY package* ./
 RUN npm install
 COPY index.js .

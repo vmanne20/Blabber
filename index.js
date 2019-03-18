@@ -1,3 +1,9 @@
+/**
+ * Original Source Code from https://github.com/mikesir87/s19-first-node-image
+ * Authors: Vince Di Nardo, Vamsi Manne
+ * Created to align with Blabber API: https://cs2304.mikesir87.io/spec/
+ */
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
@@ -14,14 +20,13 @@ app.get('/blabs/:createdSince', (req, res) => {
         if (blabs[i].postTime >= req.params.createdSince)
             output.push(blabs[i]);
     }
-    res.send(output);
+    res.status(200).send(output);
 });
 
 app.post('/blabs', (req, res) => {
-    
     const newBlab = {
         id : JSON.stringify(uidCount),
-        postTime: Date.getTime(),
+        postTime: (new Date()).getTime(),
         author: req.body.author,
         message: req.body.message,
     }

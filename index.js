@@ -13,11 +13,13 @@ app.use(bodyParser.json());
 const blabs = [];
 uidCount = 0;
 
-app.get('/blabs/:createdSince', (req, res) => {
+app.get('/blabs', (req, res) => {
+
+    const createdSince = req.query.createdSince;
     
     let output = [];
     for (let i = 0; i < blabs.length; i++) {
-        if (blabs[i].postTime >= req.params.createdSince)
+        if (blabs[i].postTime >= createdSince)
             output.push(blabs[i]);
     }
     res.status(200).send(output);

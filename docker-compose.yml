@@ -3,4 +3,9 @@ version: "3.7"
 services:
   blabber:
     image: dinardov/blabber:latest
-    command: nodemon index.js
+    command: npm run dev
+    working_dir: /blabber
+    volumes: 
+      - ./:/blabber
+    ports: 
+      - 3000:3000

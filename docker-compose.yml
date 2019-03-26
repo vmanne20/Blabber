@@ -11,7 +11,7 @@ services:
       - 3000:3000
     labels:
       - "traefik.frontend.rule=Host:blabber.docker.localhost"
-      - "traefik.frontend.rule=Path: /api; ReplacePath: /"
+      - "traefik.frontend.rule=ReplacePathRegex: ^/api/blabs(?:/(.*))?$$ /blabs/$${1}"
   reverse-proxy:
     image: traefik # The official Traefik docker image
     command: --api --docker # Enables the web UI and tells Traefik to listen to docker
@@ -20,3 +20,5 @@ services:
       - "8080:8080" # The Web UI (enabled by --api)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+  client-ui:
+    image: vtcs2304s19/blabber-client

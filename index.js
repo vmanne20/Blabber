@@ -21,7 +21,7 @@ app.get('/blabs', (req, res) => {
 
     const createdSince = req.query.createdSince;
     mongoDb.collection('blabs')
-        .find({postTime: {$gte:createdSince}}).toArray()    // finds all blabs that were created after the createdSince value
+        .find({postTime: {$gte:createdSince}}).toArray()  // finds all blabs that were created after 'createdSince' value
         .then(function(items) {
             res.status(200).send(items);
         });

@@ -19,16 +19,11 @@ uidCount = 0;
 
 app.get('/blabs', (req, res) => {
 
+    const createdSince = req.query.createdSince;
     mongoDb.collection('blabs')
-        .find({}).toArray()
+        .find({postTime: {$gte:createdSince}}).toArray()    // finds all blabs that were created after the createdSince value
         .then(function(items) {
-            const createdSince = req.query.createdSince;
-            let blabs = [];
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].postTime >= createdSince)
-                    blabs.push(items[i]);
-            }
-            res.status(200).send(blabs);
+            res.status(200).send(items);
         });
 });
 
@@ -41,7 +36,7 @@ app.post('/blabs', (req, res) => {
     }
 
     mongoDb.collection('blabs')
-        .insertOne(newBlab)
+        .insertOne(newBlab)         // inserts new blab into Mongo collection
         .then(function(response) {
             uidCount++;
             res.status(201).send(`Blab created successfully.`);
@@ -50,24 +45,20 @@ app.post('/blabs', (req, res) => {
 
 app.delete('/blabs/:id', (req, res) => {
 
-    for (let i = 0; i < blabs.length; i++) {
-        if (blabs[i].id === req.params.id) {
-            blabs.splice(i, 1);
+    mongoDb.collection('blabs')
+        .deleteOne({id: {$eq: req.params.id}})      // delete blab that matches id in request parameter
+        .then(function(response) {
             res.status(200).send(`Blab deleted successfully.`);
-            return;
-        }
-    }
+        });
     res.status(404).send(`Blab not found`);
 });
 
+// connects to a MongoDB instance via a URL
 MongoClient.connect(mongoUrl, function(err, client) {
     if (err)
         throw err;
-
     console.log("Connected successfully to server");
-   
     mongoDb = client.db();
-
     app.listen(3000, () => {
         console.log('Listening on port 3000');
     });

@@ -8,21 +8,28 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 
+// specify mongo client and URL
+const MongoClient = require('mongodb').MongoClient; 
+const mongoUrl = 'mongodb://mongo:27017';
+let mongoDb = null;
+
 app.use(bodyParser.json());
 
-const blabs = [];
 uidCount = 0;
 
 app.get('/blabs', (req, res) => {
 
-    const createdSince = req.query.createdSince;
-    
-    let output = [];
-    for (let i = 0; i < blabs.length; i++) {
-        if (blabs[i].postTime >= createdSince)
-            output.push(blabs[i]);
-    }
-    res.status(200).send(output);
+    mongoDb.collection('blabs')
+        .find({}).toArray()
+        .then(function(items) {
+            const createdSince = req.query.createdSince;
+            let blabs = [];
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].postTime >= createdSince)
+                    blabs.push(items[i]);
+            }
+            res.status(200).send(blabs);
+        });
 });
 
 app.post('/blabs', (req, res) => {
@@ -32,9 +39,13 @@ app.post('/blabs', (req, res) => {
         author: req.body.author,
         message: req.body.message,
     }
-    blabs.push(newBlab);
-    uidCount++;
-    res.status(201).send(`Blab created successfully.`);
+
+    mongoDb.collection('blabs')
+        .insertOne(newBlab)
+        .then(function(response) {
+            uidCount++;
+            res.status(201).send(`Blab created successfully.`);
+        });
 });
 
 app.delete('/blabs/:id', (req, res) => {
@@ -49,6 +60,15 @@ app.delete('/blabs/:id', (req, res) => {
     res.status(404).send(`Blab not found`);
 });
 
-app.listen(3000, () => {
-    console.log('Listening on port 3000');
+MongoClient.connect(mongoUrl, function(err, client) {
+    if (err)
+        throw err;
+
+    console.log("Connected successfully to server");
+   
+    mongoDb = client.db();
+
+    app.listen(3000, () => {
+        console.log('Listening on port 3000');
+    });
 });

@@ -15,9 +15,9 @@ services:
       - "traefik.frontend.rule=Host:localhost"
       # - "traefik.frontend.rule=Path: /api/blabs(.*)"
       # - "traefik.frontend.rule=ReplacePathRegex: ^/api/blabs(?:/(.*))?$$ /blabs/$${1}"
-      - "traefik.frontend.rule=Path: /api{reg:(.*)}"
+      # - "traefik.frontend.rule=Path: /api{reg:(.*)}"
       - "traefik.frontend.rule=PathPrefixStrip: /api/"
-      - "traefik.port=3000"
+      # - "traefik.port=3000"
   reverse-proxy:
     image: traefik # The official Traefik docker image
     command: --api --docker # Enables the web UI and tells Traefik to listen to docker
@@ -33,5 +33,5 @@ services:
     labels:
       - "traefik.backend=client-ui"
       - "traefik.frontend.rule=Host:localhost"
-      - "traefik.frontend.rule=Path: /"
-      - "traefik.port=80"
+      # - "traefik.frontend.rule=Path: /"
+      # - "traefik.port=80"

@@ -4,14 +4,14 @@
 version: "3.7"
 
 services:
-  blabber:
+  blabber-api:
     image: dinardov/blabber:latest
     command: npm run dev
     working_dir: /blabber
     volumes: 
       - ./:/blabber
     labels:
-      - "traefik.backend=blabber"
+      - "traefik.backend=blabber-api"
       - "traefik.frontend.rule=Host:localhost"
       # - "traefik.frontend.rule=Path: /api/blabs(.*)"
       # - "traefik.frontend.rule=ReplacePathRegex: ^/api/blabs(?:/(.*))?$$ /blabs/$${1}"
@@ -26,6 +26,8 @@ services:
       - "8080:8080" # The Web UI (enabled by --api)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+    labels:
+      - "traefik.backend=reverse-proxy"
   client-ui:
     image: vtcs2304s19/blabber-client
     labels:

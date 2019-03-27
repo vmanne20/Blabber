@@ -1,3 +1,6 @@
+# Forcefully delete all containers with: docker container rm -f $(docker container ls -aq)
+# Compose all containers with: docker-compose up -d
+
 version: "3.7"
 
 services:
@@ -7,11 +10,14 @@ services:
     working_dir: /blabber
     volumes: 
       - ./:/blabber
-    ports: 
-      - 3000:3000
     labels:
-      - "traefik.frontend.rule=Host:blabber.docker.localhost"
-      - "traefik.frontend.rule=ReplacePathRegex: ^/api/blabs(?:/(.*))?$$ /blabs/$${1}"
+      - "traefik.backend=blabber"
+      - "traefik.frontend.rule=Host:localhost"
+      # - "traefik.frontend.rule=Path: /api/blabs(.*)"
+      # - "traefik.frontend.rule=ReplacePathRegex: ^/api/blabs(?:/(.*))?$$ /blabs/$${1}"
+      - "traefik.frontend.rule=Path: /api{reg:(.*)}"
+      - "traefik.frontend.rule=PathPrefixStrip: /api/"
+      - "traefik.port=3000"
   reverse-proxy:
     image: traefik # The official Traefik docker image
     command: --api --docker # Enables the web UI and tells Traefik to listen to docker
@@ -22,3 +28,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
   client-ui:
     image: vtcs2304s19/blabber-client
+    labels:
+      - "traefik.backend=client-ui"
+      - "traefik.frontend.rule=Host:localhost"
+      - "traefik.frontend.rule=Path: /"
+      - "traefik.port=80"

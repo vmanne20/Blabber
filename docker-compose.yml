@@ -18,6 +18,8 @@ services:
       # - "traefik.frontend.rule=Path: /api{reg:(.*)}"
       - "traefik.frontend.rule=PathPrefixStrip: /api/"
       # - "traefik.port=3000"
+    links:
+      - mongo
   reverse-proxy:
     image: traefik # The official Traefik docker image
     command: --api --docker # Enables the web UI and tells Traefik to listen to docker
@@ -35,3 +37,12 @@ services:
       - "traefik.frontend.rule=Host:localhost"
       # - "traefik.frontend.rule=Path: /"
       # - "traefik.port=80"
+
+  mongo:
+    image: mongo
+    volumes:
+      - ./data:/data/db
+
+volumes:
+  data:
+    

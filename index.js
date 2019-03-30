@@ -10,7 +10,7 @@ const app = express();
 
 // specify mongo client and URL
 const MongoClient = require('mongodb').MongoClient; 
-const mongoUrl = 'mongodb://mongo:27017';
+const mongoUrl = 'mongodb://mongo:27017/data/db';
 let mongoDb = null;
 
 app.use(bodyParser.json());
@@ -59,7 +59,7 @@ MongoClient.connect(mongoUrl, function(err, client) {
         throw err;
     console.log("Connected successfully to server");
     mongoDb = client.db();
-    app.listen(3000, () => {
-        console.log('Listening on port 3000');
+    app.listen(80, () => {
+        console.log('Listening on port 80');
     });
 });

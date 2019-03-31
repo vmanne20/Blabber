@@ -8,28 +8,31 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 
-// specify mongo client and URL
+// specify mongo client and port to connect to
 const MongoClient = require('mongodb').MongoClient; 
 const mongoUrl = 'mongodb://mongo:27017';
 let mongoDb = null;
 
 app.use(bodyParser.json());
+uidCount = 0;   // global count that is assigned to new blabs as a unique ID
 
-uidCount = 0;
 
+// ------------ GET REQUEST ---------------------
 app.get('/blabs', (req, res) => {
     const createdSince = req.query.createdSince;
+
+    // finds all blabs that were created after 'createdSince' value
     mongoDb.collection('blabs')
-        // {'postTime': {$gte: createdSince}} 
-        .find( {'postTime': {$gt: createdSince}} ).toArray()             // finds all blabs that were created after 'createdSince' value
+        .find( {'postTime': {$gte: createdSince}} ).toArray()  
         .then(function(items) {
             res.status(200).send(items);
         });
 });
 
+
+// ------------ POST REQUEST ---------------------
 app.post('/blabs', (req, res) => {
     const newBlab = {
-        // JSON.stringify(uidCount)
         id : JSON.stringify(uidCount),
         postTime: ((new Date()).getTime() / 1000.0),
         author: req.body.author,
@@ -40,34 +43,36 @@ app.post('/blabs', (req, res) => {
         .insertOne(newBlab)         // inserts new blab into Mongo collection
         .then(function(response) {
             uidCount++;
-            res.status(201).send(`Blab created successfully.`);
+            res.status(201).send(`Blab ${newBlab.id} created successfully.`);
         });
 });
 
+
+// ------------ DELETE REQUEST ---------------------
 app.delete('/blabs/:id', (req, res) => {
 
+    // finds blab that matches id in request parameter
     mongoDb.collection('blabs')
-        .remove( {'id': {$eq: req.params.id}})     // delete blab that matches id in request parameter
-        .then(function(response) {
-            console.log("Response: " + response);
-            console.log("length: " + response.length);
-            if (response.length == 0)
+        .find( {'id': {$exists: true, $eq: req.params.id}}).toArray()
+        .then(function(items, err) {
+
+            // if matching blab was found, remove it and send success status
+            if (items.length > 0) {
+                mongoDb.collection('blabs').remove({id: req.params.id}, err => {
+                    res.status(200).send(`Blab deleted successfully.`); 
+                });
+            } 
+            
+            // if matching blab was NOT found, send 404 status
+            else {    
                 res.status(404).send(`Blab not found`);
-            else
-                res.status(200).send(`Blab deleted successfully.`);   
+                throw err;
+            }
         });
-       //.catch(err => res.status(404).send(`Blab not found`));
-    // catch (err) {
-    //     res.status(404).send(`Blab not found`);
-    // }
-    //.catch();
-    // (err) => {
-    //     if (err)
-    //         res.status(404).send(`Blab not found`);
-    // }
 });
 
-// connects to a MongoDB instance via a URL
+
+// connects to a MongoDB instance via port 27017
 MongoClient.connect(mongoUrl, function(err, client) {
     if (err)
         throw err;

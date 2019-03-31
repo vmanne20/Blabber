@@ -41,8 +41,11 @@ services:
   mongo:
     image: mongo
     volumes:
-      - ./data:/data/db
+      - mongo-data:/data/db
+    labels:
+      - "traefik.backend=mongo"
+      - "traefik.frontend.rule=Host:localhost"
 
 volumes:
-  data:
+  mongo-data:
     

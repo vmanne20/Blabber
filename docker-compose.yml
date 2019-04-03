@@ -45,9 +45,6 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
-    labels:
-      - "traefik.backend=mongo"
-      - "traefik.frontend.rule=Host:localhost"
 
   tests:
     image: vtcs2304s19/blabber-api-tests

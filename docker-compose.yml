@@ -18,7 +18,7 @@ services:
       # - "traefik.frontend.rule=Path: /api{reg:(.*)}"
       - "traefik.frontend.rule=PathPrefixStrip: /api/"
       # - "traefik.port=3000"
-    links:
+    depends_on:
       - mongo
   reverse-proxy:
     image: traefik # The official Traefik docker image

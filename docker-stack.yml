@@ -1,0 +1,65 @@
+version: "3.7"
+
+services:
+  blabber-api:
+    image: dinardov/blabber:latest
+    command: npm run dev
+    working_dir: /blabber
+    volumes: 
+      - ./:/blabber
+    labels:
+      - "traefik.backend=blabber-api"
+      - "traefik.frontend.rule=Host:localhost"
+      - "traefik.frontend.rule=PathPrefixStrip: /api/"
+    depends_on:
+      - mongo
+    deploy:
+      replicas: 2
+      placement:
+        constraints: [node.role == worker]
+
+  reverse-proxy:
+    image: traefik # The official Traefik docker image
+    command: --api --docker # Enables the web UI and tells Traefik to listen to docker
+    ports:
+      - "80:80"     # The HTTP port
+      - "8080:8080" # The Web UI (enabled by --api)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+    labels:
+      - "traefik.backend=reverse-proxy"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+  client-ui:
+    image: vtcs2304s19/blabber-client
+    labels:
+      - "traefik.backend=client-ui"
+      - "traefik.frontend.rule=Host:localhost"
+    deploy:
+      replicas: 2
+      placement:
+        constraints: [node.role == worker]
+
+  mongo:
+    image: mongo
+    ports: 
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+  # tests:
+  #   image: vtcs2304s19/blabber-api-tests
+  #   environment:
+  #     SERVICE_NAME: blabber-api
+  #     API_PORT: "3000" 
+  #   depends_on:
+  #     - blabber-api
+
+volumes:
+  mongo-data:
+    

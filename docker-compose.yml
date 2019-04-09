@@ -6,8 +6,9 @@ version: "3.7"
 services:
   blabber-api:
     image: dinardov/blabber:latest
+    # build: ./
     command: npm run dev
-    working_dir: /blabber
+    # working_dir: /blabber
     volumes: 
       - ./:/blabber
     labels:
@@ -41,8 +42,6 @@ services:
 
   mongo:
     image: mongo
-    ports: 
-      - "27017:27017"
     volumes:
       - mongo-data:/data/db
 

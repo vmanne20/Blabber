@@ -1,3 +1,5 @@
+# For visualization: docker-app deploy mikesir87/swarm-viz.dockerapp
+
 version: "3.7"
 
 services:
@@ -7,25 +9,32 @@ services:
     working_dir: /blabber
     volumes: 
       - ./:/blabber
+    networks:
+      - shared-net
     labels:
       - "traefik.backend=blabber-api"
       - "traefik.frontend.rule=Host:localhost"
       - "traefik.frontend.rule=PathPrefixStrip: /api/"
+      # - "traefik.port=3000"
     depends_on:
       - mongo
     deploy:
       replicas: 2
       placement:
         constraints: [node.role == worker]
+      restart_policy:
+        condition: on-failure
 
   reverse-proxy:
     image: traefik # The official Traefik docker image
-    command: --api --docker # Enables the web UI and tells Traefik to listen to docker
+    command: --api --docker --docker.swarmMode --docker.watch # Enables the web UI and tells Traefik to listen to docker
     ports:
       - "80:80"     # The HTTP port
       - "8080:8080" # The Web UI (enabled by --api)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+    networks:
+      - shared-net
     labels:
       - "traefik.backend=reverse-proxy"
     deploy:
@@ -34,6 +43,8 @@ services:
 
   client-ui:
     image: vtcs2304s19/blabber-client
+    networks:
+      - shared-net
     labels:
       - "traefik.backend=client-ui"
       - "traefik.frontend.rule=Host:localhost"
@@ -44,13 +55,13 @@ services:
 
   mongo:
     image: mongo
-    ports: 
-      - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    networks:
+      - shared-net
     deploy:
       placement:
-        constraints: [node.role == manager]
+        constraints: [node.role == worker]
 
   # tests:
   #   image: vtcs2304s19/blabber-api-tests
@@ -62,4 +73,7 @@ services:
 
 volumes:
   mongo-data:
+
+networks:
+  shared-net:
     

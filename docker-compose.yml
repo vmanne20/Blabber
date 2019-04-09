@@ -1,5 +1,6 @@
 # Forcefully delete all containers with: docker container rm -f $(docker container ls -aq)
 # Compose all containers with: docker-compose up -d
+# Note: You CANNOT run this file alone on play-with-docker because we mount the current directory
 
 version: "3.7"
 

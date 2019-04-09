@@ -6,9 +6,9 @@ services:
   blabber-api:
     image: dinardov/blabber:latest
     command: npm run dev
-    working_dir: /blabber
+    # working_dir: /blabber
     volumes: 
-      - ./:/blabber
+      - api-dev:/blabber
     networks:
       - shared-net
     labels:
@@ -63,6 +63,16 @@ services:
       placement:
         constraints: [node.role == worker]
 
+  # stack-visualizer:
+  #   image: mikesir87/swarm-viz
+  #   ports:
+  #     - 3000:3000
+  #   networks:
+  #     - shared-net
+  #   deploy:
+  #     placement:
+  #       constraints: [node.role == worker]
+
   # tests:
   #   image: vtcs2304s19/blabber-api-tests
   #   environment:
@@ -73,6 +83,7 @@ services:
 
 volumes:
   mongo-data:
+  api-dev:
 
 networks:
   shared-net:

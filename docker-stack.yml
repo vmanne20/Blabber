@@ -1,4 +1,5 @@
 # For visualization: docker-app deploy mikesir87/swarm-viz.dockerapp
+# Note: you need traefik.port for traefik to see the containers
 
 version: "3.7"
 
@@ -24,10 +25,15 @@ services:
         constraints: [node.role == worker]
       restart_policy:
         condition: on-failure
+      labels:
+        - "traefik.backend=blabber-api"
+        - "traefik.frontend.rule=PathPrefixStrip: /api/"
+        - "traefik.port=3000"
 
   reverse-proxy:
     image: traefik # The official Traefik docker image
-    command: --api --docker --docker.swarmMode --docker.watch # Enables the web UI and tells Traefik to listen to docker
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --web --docker --docker.swarmMode --docker.domain=traefik --docker.watch 
     ports:
       - "80:80"     # The HTTP port
       - "8080:8080" # The Web UI (enabled by --api)
@@ -47,11 +53,15 @@ services:
       - shared-net
     labels:
       - "traefik.backend=client-ui"
-      - "traefik.frontend.rule=Host:localhost"
+      # - "traefik.frontend.rule=Host:localhost"
     deploy:
       replicas: 2
       placement:
         constraints: [node.role == worker]
+      labels:
+        - "traefik.backend=client-ui"
+        - "traefik.frontend.rule=PathPrefixStrip: /"
+        - "traefik.port=80"
 
   mongo:
     image: mongo

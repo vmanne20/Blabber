@@ -65,6 +65,10 @@ services:
 
   mongo:
     image: mongo
+    command: [--auth]
+    secrets:
+      - mongo-user
+      - mongo-password
     volumes:
       - mongo-data:/data/db
     networks:
@@ -91,10 +95,29 @@ services:
   #   depends_on:
   #     - blabber-api
 
+secrets:
+  mongo-user:
+    file: ./secrets/mongo-root-u
+  mongo-password:
+    file: ./secrets/mongo-root-p
+
 volumes:
   mongo-data:
   api-dev:
 
 networks:
   shared-net:
-    
+
+# docker run -it --rm --network root_shared-net mongo \
+#   mongo --host root_mongo_1 \
+#     -u mongoadmin \
+#     -p secret \
+#     --authenticationDatabase admin \
+#     some-db
+
+# docker run -it --rm --network root_shared-net mongo \
+#   mongo --host root_mongo_1 \
+#     -u user \
+#     -p password \
+#     --authenticationDatabase admin \
+#     some-db

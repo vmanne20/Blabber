@@ -85,14 +85,42 @@ app.delete('/blabs/:id', (req, res) => {
 
 
 // connects to a MongoDB instance via port 27017
-MongoClient.connect(mongoUrl, (err, client) => {
-    if (err) {
-        console.log("Failed to connect to mongo server");
-        throw err;
+// MongoClient.connect(mongoUrl, (err, client) => {
+//     if (err) {
+//         console.log("Failed to connect to mongo server");
+//         throw err;
+//     }
+//     console.log("Connected successfully to mongo server");
+//     mongoDb = client.db();
+//     app.listen(3000, () => {
+//         console.log('Listening on port 3000');
+//     });
+// });
+
+// Retries connecting until connects to mongo
+let opt = {
+    user: 'user',
+    pass: 'password',
+    auth: {
+        authdb: 'admin'
     }
-    console.log("Connected successfully to mongo server");
-    mongoDb = client.db();
-    app.listen(3000, () => {
-        console.log('Listening on port 3000');
+};
+
+async function tryConnecting(callback) {
+    MongoClient.connect(mongoUrl, JSON.stringify(opt), (err, client) => {
+        if (err) {
+            console.log("Failed to connect to mongo server");
+            setTimeout(tryConnecting.bind(callback), 1000);
+        } else {
+            callback();
+            mongoDb = client.db();
+            app.listen(3000, () => {
+                console.log('Listening on port 3000');
+            });
+        }
     });
+}
+
+tryConnecting(() => {
+    console.log("Connected successfully to mongo server");
 });

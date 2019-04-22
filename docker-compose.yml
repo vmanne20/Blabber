@@ -41,10 +41,14 @@ services:
       # - "traefik.frontend.rule=Path: /"
       # - "traefik.port=80"
 
+  # OBVIOUSLY NEED TO CHANGE THIS (don't use enviro, use secrets)
   mongo:
     image: mongo
     volumes:
       - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_USERNAME: user
 
   tests:
     image: vtcs2304s19/blabber-api-tests

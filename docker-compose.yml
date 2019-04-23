@@ -22,6 +22,8 @@ services:
       # - "traefik.port=3000"
     depends_on:
       - mongo
+    ports:
+      - 3002:3000
   reverse-proxy:
     image: traefik # The official Traefik docker image
     command: --api --docker # Enables the web UI and tells Traefik to listen to docker
@@ -47,8 +49,8 @@ services:
     volumes:
       - mongo-data:/data/db
     environment:
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: 'password'
+      MONGO_INITDB_ROOT_USERNAME: 'user'
 
   tests:
     image: vtcs2304s19/blabber-api-tests

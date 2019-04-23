@@ -15,6 +15,13 @@ let mongoDb = null;
 
 app.use(bodyParser.json());
 
+let opt = {
+    auth: {
+        user: 'user',
+        password: 'password',
+        authdb: 'admin'
+    }
+};
 
 // ------------ GET REQUEST ---------------------
 app.get('/blabs', (req, res) => {
@@ -98,22 +105,16 @@ app.delete('/blabs/:id', (req, res) => {
 // });
 
 // Retries connecting until connects to mongo
-let opt = {
-    user: 'user',
-    pass: 'password',
-    auth: {
-        authdb: 'admin'
-    }
-};
-
 async function tryConnecting(callback) {
-    MongoClient.connect(mongoUrl, JSON.stringify(opt), (err, client) => {
+    MongoClient.connect(mongoUrl, opt, (err, client) => {
         if (err) {
             console.log("Failed to connect to mongo server");
             setTimeout(tryConnecting.bind(callback), 1000);
+            throw err;
         } else {
             callback();
-            mongoDb = client.db();
+            mongoDb = client.db('test').admin();
+            // mongoDb.auth(opt.user, opt.pass);
             app.listen(3000, () => {
                 console.log('Listening on port 3000');
             });

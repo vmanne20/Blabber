@@ -4,13 +4,33 @@
  * Created to align with Blabber API: https://cs2304.mikesir87.io/spec/
  */
 
+const fs = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 
+console.log(process.env.BLABBER_DB_PASSWORD_FILE);
+console.log(process.env.BLABBER_DB_USER_FILE);
+
+let password = '';
+fs.readFileSync('/run/secrets/mongo-password', 'utf-8', (err, data) => {
+    if (err) throw err;
+    password = data.toString();
+});
+console.log(password);
+
+let user = '';
+fs.readFile('/run/secrets/mongo-user', (err, data) => {
+    if (err) throw err;
+    password = data.toString();
+});
+console.log(user);
+
 // specify mongo client and port
 const MongoClient = require('mongodb').MongoClient; 
-const mongoUrl = 'mongodb://mongo:27017';
+// const mongoUrl = 'mongodb://' + user + ':' + password + '@mongo:27017';
+const mongoUrl = 'mongodb://user:super-secret-password@mongo:27017';
+console.log(mongoUrl);
 let mongoDb = null;
 
 app.use(bodyParser.json());

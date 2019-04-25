@@ -1,1 +1,1 @@
-super-secret-password
+MONGO_INITDB_ROOT_PASSWORD=super-secret-password

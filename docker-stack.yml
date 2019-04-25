@@ -10,6 +10,12 @@ services:
     # working_dir: /blabber
     volumes: 
       - api-dev:/blabber
+    environment:
+      BLABBER_DB_USER_FILE: /run/secrets/mongo-user
+      BLABBER_DB_PASSWORD_FILE: /run/secrets/mongo-password
+    secrets:
+      - mongo-password
+      - mongo-user
     networks:
       - shared-net
     labels:
@@ -69,11 +75,23 @@ services:
     # command: [--auth]
     volumes:
       - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/mongo-user
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo-password
+    secrets:
+      - mongo-password
+      - mongo-user
     networks:
       - shared-net
     deploy:
       placement:
         constraints: [node.role == worker]
+
+secrets:
+  mongo-user:
+    file: ./mongo-root-u.txt
+  mongo-password:
+    file: ./mongo-root-p.txt
 
 volumes:
   mongo-data:

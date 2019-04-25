@@ -92,36 +92,36 @@ app.delete('/blabs/:id', (req, res) => {
 
 
 // connects to a MongoDB instance via port 27017
-// MongoClient.connect(mongoUrl, (err, client) => {
-//     if (err) {
-//         console.log("Failed to connect to mongo server");
-//         throw err;
-//     }
-//     console.log("Connected successfully to mongo server");
-//     mongoDb = client.db();
-//     app.listen(3000, () => {
-//         console.log('Listening on port 3000');
-//     });
-// });
-
-// Retries connecting until connects to mongo
-async function tryConnecting(callback) {
-    MongoClient.connect(mongoUrl, opt, (err, client) => {
-        if (err) {
-            console.log("Failed to connect to mongo server");
-            setTimeout(tryConnecting.bind(callback), 1000);
-            throw err;
-        } else {
-            callback();
-            mongoDb = client.db('test').admin();
-            // mongoDb.auth(opt.user, opt.pass);
-            app.listen(3000, () => {
-                console.log('Listening on port 3000');
-            });
-        }
-    });
-}
-
-tryConnecting(() => {
+MongoClient.connect(mongoUrl, (err, client) => {
+    if (err) {
+        console.log("Failed to connect to mongo server");
+        throw err;
+    }
     console.log("Connected successfully to mongo server");
+    mongoDb = client.db();
+    app.listen(3000, () => {
+        console.log('Listening on port 3000');
+    });
 });
+
+// // Retries connecting until connects to mongo
+// async function tryConnecting(callback) {
+//     MongoClient.connect(mongoUrl, opt, (err, client) => {
+//         if (err) {
+//             console.log("Failed to connect to mongo server");
+//             setTimeout(tryConnecting.bind(callback), 1000);
+//             throw err;
+//         } else {
+//             callback();
+//             mongoDb = client.db('test').admin();
+//             // mongoDb.auth(opt.user, opt.pass);
+//             app.listen(3000, () => {
+//                 console.log('Listening on port 3000');
+//             });
+//         }
+//     });
+// }
+
+// tryConnecting(() => {
+//     console.log("Connected successfully to mongo server");
+// });

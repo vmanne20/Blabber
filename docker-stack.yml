@@ -6,16 +6,10 @@ version: "3.7"
 services:
   blabber-api:
     image: vmanne20/blabber-new:latest
-    command: npm run dev
+    # command: node index.js
     # working_dir: /blabber
     volumes: 
       - api-dev:/blabber
-    environment:
-      BLABBER_DB_HOST: mongo:27017
-      BLABBER_DB_USER: user
-      BLABBER_DB_PASSWORD_FILE: /run/secrets/mongo-password
-    secrets:
-      - mongo-password
     networks:
       - shared-net
     labels:
@@ -72,40 +66,14 @@ services:
 
   mongo:
     image: mongo
-    command: [--auth]
+    # command: [--auth]
     volumes:
       - mongo-data:/data/db
-    environment:
-      DB_PASSWORD_FILE: /run/secrets/mongo-password
-    secrets:
-      - mongo-password
     networks:
       - shared-net
     deploy:
       placement:
         constraints: [node.role == worker]
-
-  # stack-visualizer:
-  #   image: mikesir87/swarm-viz
-  #   ports:
-  #     - 3000:3000
-  #   networks:
-  #     - shared-net
-  #   deploy:
-  #     placement:
-  #       constraints: [node.role == worker]
-
-  # tests:
-  #   image: vtcs2304s19/blabber-api-tests
-  #   environment:
-  #     SERVICE_NAME: blabber-api
-  #     API_PORT: "3000" 
-  #   depends_on:
-  #     - blabber-api
-
-secrets:
-  mongo-password:
-    file: ./mongo-root-p.txt
 
 volumes:
   mongo-data:

@@ -109,7 +109,7 @@ MongoClient.connect(mongoUrl, (err, client) => {
 //     MongoClient.connect(mongoUrl, opt, (err, client) => {
 //         if (err) {
 //             console.log("Failed to connect to mongo server");
-//             setTimeout(tryConnecting.bind(callback), 1000);
+//             setTimeout(() => tryConnecting(callback), 1000);
 //             throw err;
 //         } else {
 //             callback();

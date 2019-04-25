@@ -8,29 +8,18 @@ const fs = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const MongoClient = require('mongodb').MongoClient; 
 
-console.log(process.env.BLABBER_DB_PASSWORD_FILE);
-console.log(process.env.BLABBER_DB_USER_FILE);
+// console.log(String(process.env.BLABBER_DB_CONNECTION));
 
-let password = '';
-fs.readFileSync('/run/secrets/mongo-password', 'utf-8', (err, data) => {
-    if (err) throw err;
-    password = data.toString();
-});
-console.log(password);
-
-let user = '';
-fs.readFile('/run/secrets/mongo-user', (err, data) => {
-    if (err) throw err;
-    password = data.toString();
-});
-console.log(user);
+let mongoUrl = '';//mongodb://user:super-secret-password@mongo:27017';
+mongoUrl = fs.readFileSync(/*'/run/secrets/mongo-connection'*/ process.env.BLABBER_DB_CONNECTION, 'utf-8').trim();
+console.log(mongoUrl);
 
 // specify mongo client and port
-const MongoClient = require('mongodb').MongoClient; 
 // const mongoUrl = 'mongodb://' + user + ':' + password + '@mongo:27017';
-const mongoUrl = 'mongodb://user:super-secret-password@mongo:27017';
-console.log(mongoUrl);
+// const mongoUrl = 'mongodb://user:super-secret-password@mongo:27017';
+// console.log(mongoUrl);
 let mongoDb = null;
 
 app.use(bodyParser.json());

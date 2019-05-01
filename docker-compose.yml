@@ -6,12 +6,16 @@ version: "3.7"
 
 services:
   blabber-api:
-    image: vmanne20/blabber-new
+    image: dinardov/blabber
     # build: ./
     command: npm run dev
     # working_dir: /blabber
     volumes: 
       - ./:/blabber
+    environment:
+      BLABBER_DB_CONNECTION: /run/secrets/mongo-connection
+    secrets:
+      - mongo-connection
     labels:
       - "traefik.backend=blabber-api"
       - "traefik.frontend.rule=Host:localhost"
@@ -48,9 +52,9 @@ services:
     image: mongo
     volumes:
       - mongo-data:/data/db
-    environment:
-      MONGO_INITDB_ROOT_PASSWORD: 'password'
-      MONGO_INITDB_ROOT_USERNAME: 'user'
+    # environment:
+    #   MONGO_INITDB_ROOT_PASSWORD: 'super-secret-password'
+    #   MONGO_INITDB_ROOT_USERNAME: 'user'
 
   tests:
     image: vtcs2304s19/blabber-api-tests
@@ -62,4 +66,8 @@ services:
 
 volumes:
   mongo-data:
+
+secrets:
+  mongo-connection:
+    file: ./mongo-connection.txt
     

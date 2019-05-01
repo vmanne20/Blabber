@@ -9,11 +9,23 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const MongoClient = require('mongodb').MongoClient; 
+const PromClient = require('prom-client');
+
+// This is a gauge in case later we want it to be a current "count"
+const NumBlabsGauge = new PromClient.Gauge({ name: 'total_blabs_created_count', help: 'The number of blabs created ever from this app instance (not the number of existing blabs).' });
+NumBlabsGauge.set(0);
+const ReqTimeHistogram = new PromClient.Histogram({
+    name: 'http_request_durations_sec',
+    help: 'Request durations for all endpoints accessed, as a histogram.',
+    // buckets: [0.1, 5, 15, 50, 100, 500]
+});
+// console.log("HELP:" + ReqTimeHistogram.observe(10));
 
 // console.log(String(process.env.BLABBER_DB_CONNECTION));
 
 let mongoUrl = '';//mongodb://user:super-secret-password@mongo:27017';
 mongoUrl = fs.readFileSync(/*'/run/secrets/mongo-connection'*/ process.env.BLABBER_DB_CONNECTION, 'utf-8').trim();
+// mongoUrl = 'mongodb://mongo:27017';// TODO: REMOVE THIS!!!
 console.log(mongoUrl);
 
 // specify mongo client and port
@@ -24,16 +36,31 @@ let mongoDb = null;
 
 app.use(bodyParser.json());
 
-let opt = {
-    auth: {
-        user: 'user',
-        password: 'password',
-        authdb: 'admin'
-    }
-};
+// let opt = {
+//     auth: {
+//         user: 'user',
+//         password: 'password',
+//         authdb: 'admin'
+//     }
+// };
+
+// ---------- PROMETHEUS GET REQUEST ------------
+
+const collectDefaultMetrics = PromClient.collectDefaultMetrics;
+
+// Probe every 5th second.
+collectDefaultMetrics({ prefix: 'blabber_api_', timeout: 5000 });
+
+app.get('/metrics', (req, res) => {
+    const end = ReqTimeHistogram.startTimer();
+    res.status(200).send(PromClient.register.metrics());
+    end();
+});
 
 // ------------ GET REQUEST ---------------------
 app.get('/blabs', (req, res) => {
+    const end = ReqTimeHistogram.startTimer(); // Note: the healthcheck checks here, so it will constantly increast the count
+
     const createdSince = req.query.createdSince;
 
     // if createdSince is specified as query with GET request
@@ -52,11 +79,15 @@ app.get('/blabs', (req, res) => {
                 res.status(200).send(items);
             });
     }
+
+    end();
 });
 
 
 // ------------ POST REQUEST ---------------------
 app.post('/blabs', (req, res) => {
+    const end = ReqTimeHistogram.startTimer();
+
     const currentTime = ((new Date()).getTime() / 1000);
     const newBlab = {
         id: currentTime,
@@ -70,12 +101,16 @@ app.post('/blabs', (req, res) => {
         .insertOne(newBlab)         
         .then(response => {
             res.status(201).send(newBlab);
+            NumBlabsGauge.inc();
         });
+    
+    end();
 });
 
 
 // ------------ DELETE REQUEST ---------------------
 app.delete('/blabs/:id', (req, res) => {
+    const end = ReqTimeHistogram.startTimer();
 
     // finds blab that matches ID in request parameter
     try {
@@ -92,11 +127,13 @@ app.delete('/blabs/:id', (req, res) => {
                     res.status(404).send(`Blab not found`);
                 }
             });
-    } 
-    // if blab with requested ID does not exist, catch 404 error
+    } // if blab with requested ID does not exist, catch 404 error
     catch (err) {
         res.status(404).send(`Blab not found`);
+        end();
     }
+
+    end();
 });
 
 

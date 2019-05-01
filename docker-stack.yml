@@ -5,7 +5,7 @@ version: "3.7"
 
 services:
   blabber-api:
-    image: vmanne20/blabber-new:latest
+    image: dinardov/blabber:latest
     # command: node index.js
     # working_dir: /blabber
     volumes: 
